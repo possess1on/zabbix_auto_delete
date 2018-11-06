@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#https://github.com/possess1on/zabbix_auto_delete/
 
 def removehost():
 	print "in removehost function"
