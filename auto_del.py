@@ -89,4 +89,4 @@ def sendmail(hostid, name, ip, dns):
 		server.quit()
 
 if __name__ == "__main__":
-    removehost()
+	removehost()
