@@ -10,14 +10,14 @@ def removehost():
 	sys.setdefaultencoding('utf8')
 
 	#Zabbix credentials
-  Server = "https://ip_addr/zabbix"
-  Login = "Admin"
-  Password = "zabbix"
-  Time_Check_Days=30
+	Server = "https://ip_addr/zabbix"
+	Login = "Admin"
+	Password = "zabbix"
+	Time_Check_Days=30
   
 	#Parser settings
-  now2 = datetime.now()
-  z = ZabbixAPI(server=Server)
+	now2 = datetime.now()
+	z = ZabbixAPI(server=Server)
 	z.login(Login, Password)
 	#timestamp
 	Timestamp_Time_Now = int(time.mktime(datetime.now().timetuple()))
