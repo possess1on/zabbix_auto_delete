@@ -15,6 +15,7 @@ def removehost():
 	Login = "Admin"
 	Password = "zabbix"
 	Time_Check_Days=30
+	Trigger_description = u'{HOST.NAME} нет связи'
   
 	#Parser settings
 	now2 = datetime.now()
@@ -29,7 +30,7 @@ def removehost():
 	#parser
 	f = open('/home/sd/del_host_log/del_log_'+ now2.strftime("%d-%m-%Y")+'.txt', 'w')
 	for trigger in z.trigger.get({"output": [ "triggerid", "description", "priority" ], "filter": { "value": 1 }, "sortfield": "priority", "sortorder": "DESC"}):
-		if trigger["description"] == u'{HOST.NAME} нет связи':
+		if trigger["description"] == Trigger_description:
 			trigmsg = z.trigger.get({"triggerids": trigger["triggerid"], "selectHosts": "extend"}) #json with []
 			for tm in trigmsg: #json withOut []
 				for l in tm['hosts']:
