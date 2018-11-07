@@ -14,8 +14,10 @@ def removehost():
 	Server = "https://ip_addr/zabbix"
 	Login = "Admin"
 	Password = "zabbix"
-	Time_Check_Days=30
-	Trigger_description = u'{HOST.NAME} нет связи'
+	Time_Check_Days = 60
+	Trigger_description = u'нет связи'
+	Trigger_description2 = u'Нет связи более 20 минут'
+	#Trigger_description2 = u'{HOST.NAME} нет связи'
   
 	#Parser settings
 	now2 = datetime.now()
@@ -28,45 +30,48 @@ def removehost():
 	Timestamp_Time_Check_Days = Timestamp_Time_Now - (3600 * 24 * Time_Check_Days)
 	Timestamp_Time_Check_Days_value = datetime.fromtimestamp(Timestamp_Time_Check_Days)
 	#parser
-	f = open('/home/sd/del_host_log/del_log_'+ now2.strftime("%d-%m-%Y")+'.txt', 'w')
+	
 	for trigger in z.trigger.get({"output": [ "triggerid", "description", "priority" ], "filter": { "value": 1 }, "sortfield": "priority", "sortorder": "DESC"}):
-		if trigger["description"] == Trigger_description:
-			trigmsg = z.trigger.get({"triggerids": trigger["triggerid"], "selectHosts": "extend"}) #json with []
-			for tm in trigmsg: #json withOut []
-				for l in tm['hosts']:
-					problem = z.problem.get({"hostids": l['hostid'], "recent": "true", "sortfield": "eventid"})
-			for pr in problem:
-				if int(pr['clock']) < Timestamp_Time_Check_Days:
-					hostinterface = z.hostinterface.get({"hostids": l['hostid'], "output": "extend"})
-					for hi in hostinterface:
-						r = now2.strftime("%d-%m-%Y %H:%M")+ " " + hi["hostid"] + " " + pr["name"] + " " + hi["ip"] + " " + hi["dns"]
-						#print r
-						f.write(r + '\n')
-						z.host.delete( [int(hi['hostid'])] )
-	f.close()
-	sendmail(hi["hostid"], pr["name"], hi["ip"], hi["dns"])
+		#if trigger["description"] == Trigger_description:
+		if Trigger_description in (trigger["description"].lower()):
+			if Trigger_description2 not in trigger["description"]:
+				trigmsg = z.trigger.get({"triggerids": trigger["triggerid"], "selectHosts": "extend"}) #json with []
+				for tm in trigmsg: #json withOut []
+					for l in tm['hosts']:
+						problem = z.problem.get({"objectids": trigger["triggerid"], "recent": "true", "sortfield": "eventid"})
+				for pr in problem:
+					if int(pr['clock']) < Timestamp_Time_Check_Days:
+						hostinterface = z.hostinterface.get({"hostids": l['hostid'], "output": "extend"})
+						for hi in hostinterface:
+							r = now2.strftime("%d-%m-%Y %H:%M")+ " " + hi["hostid"]+"/"+trigger["triggerid"] + " " + pr["name"] + " " + hi["ip"] + " " + hi["dns"]
+							print r
+							f = open('/home/sd/del_host_log/del_log_'+ now2.strftime("%d-%m-%Y")+'.txt', 'a+')
+							f.write(r + '\n')
+							f.close()
+							z.host.delete( [int(hi['hostid'])] )
+	sendmail()
 
-def sendmail(hostid, name, ip, dns):
+def sendmail():
 	print "in sendmail function"
 	import smtplib 
 	import email.utils 
 	from email.mime.multipart import MIMEMultipart 
 	from email.mime.base import MIMEBase 
 	from email.mime.text import MIMEText 
-	from email import Encoders
+	#from email import Encoders
 	from datetime import datetime
 	
 	#Mail settings
 	SMTPServer = "exsrv.example.com"
 	FromAddr = "example@example.com"
-	ToAddr = "example2@example2.com"
+	ToAddr = "example@example.com"
 	
 	#email
 	now2 = datetime.now()
 	msg = MIMEMultipart('ZDel') 
 	msg['To'] = email.utils.formataddr(('ZDel', ToAddr)) 
 	msg['From'] = email.utils.formataddr(('ZDel', FromAddr)) 
-	msg['Subject'] = 'Zabbix deleted host more than 30d inactive' 
+	msg['Subject'] = 'Zabbix deleted host more than 60d inactive' 
 
 	# Attach a file 
 
