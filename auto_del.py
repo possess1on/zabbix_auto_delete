@@ -49,7 +49,10 @@ def removehost():
 							f.write(r + '\n')
 							f.close()
 							z.host.delete( [int(hi['hostid'])] )
-	sendmail()
+	try:
+		sendmail()
+	except Exception:
+		print "No host for delete"
 
 def sendmail():
 	print "in sendmail function"
@@ -76,13 +79,13 @@ def sendmail():
 	# Attach a file 
 
 	#mail_file = file('/home/sd/del_host_log/del_log_'+ now2.strftime("%d-%m-%Y")+'.txt').read() 
-
+	
 	mail_file = MIMEBase('application', 'octet-stream') 
 	mail_file.set_payload(open('/home/sd/del_host_log/del_log_'+ now2.strftime("%d-%m-%Y")+'.txt', 'rb').read()) 
 	mail_file.add_header('Content-Disposition', 'attachment', filename='del_log_'+ now2.strftime("%d-%m-%Y")+'.txt') 
 	#Encoders.encode_base64(mail_file) 
 	msg.attach(mail_file) 
-
+	
 	# Define SMTP server 
 
 	server = smtplib.SMTP(SMTPServer) 
